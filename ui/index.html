@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>یادآوری کارهای روزانه</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
+<header class="glass hero">
+  <div class="hero-text">
+    <h1>یادآوری کارهای روزانه</h1>
+    <p id="todayDate"></p>
+    <p class="hero-sub" id="heroSub">روزت را با یک کار کوچک شروع کن.</p>
+  </div>
+  <div class="ring-wrap">
+    <svg class="ring" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="52" class="ring-bg"/>
+      <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg"/>
+      <text x="60" y="66" text-anchor="middle" class="ring-text" id="ringText">۰٪</text>
+    </svg>
+    <span class="ring-label">پیشرفت امروز</span>
+  </div>
+</header>
+
+<main>
+  <section class="glass card" id="nextCard">
+    <div class="next-row">
+      <div>
+        <span class="label">یادآوری بعدی</span>
+        <strong id="nextReminder">—</strong>
+        <span id="nextCountdown" class="countdown"></span>
+      </div>
+      <div class="stats">
+        <div><b id="statDone">۰</b><span>انجام‌شده</span></div>
+        <div><b id="statLeft">۰</b><span>باقی‌مانده</span></div>
+        <div><b id="statStreak">۰</b><span>روز پیاپی</span></div>
+      </div>
+    </div>
+    <div class="week" id="weekStrip"></div>
+  </section>
+
+  <section class="glass card">
+    <h2>➕ افزودن کار</h2>
+    <form id="taskForm">
+      <input id="fTitle" type="text" placeholder="کار را بنویس… مثلاً: قرصم را بخورم" required>
+      <div class="row">
+        <select id="fCategory" aria-label="دسته">
+          <option value="سلامتی">🩺 سلامتی</option>
+          <option value="کار">💼 کار</option>
+          <option value="خانه">🏠 خانه</option>
+          <option value="درس">📚 درس</option>
+          <option value="ورزش">🏃 ورزش</option>
+          <option value="دیگر">✨ دیگر</option>
+        </select>
+        <select id="fPriority" aria-label="اولویت">
+          <option value="بالا">🔴 اولویت بالا</option>
+          <option value="متوسط" selected>🟡 متوسط</option>
+          <option value="کم">🟢 کم</option>
+        </select>
+      </div>
+      <div class="seg" role="tablist">
+        <button type="button" class="seg-btn active" data-kind="window">بازهٔ زمانی</button>
+        <button type="button" class="seg-btn" data-kind="once">فقط یک‌بار</button>
+      </div>
+      <div id="windowFields" class="row">
+        <label>از <input id="fStart" type="time" value="14:00"></label>
+        <label>تا <input id="fEnd" type="time" value="00:00"></label>
+        <label>هر <select id="fInterval">
+          <option value="15">۱۵ دقیقه</option>
+          <option value="30" selected>۳۰ دقیقه</option>
+          <option value="60">۱ ساعت</option>
+          <option value="120">۲ ساعت</option>
+        </select></label>
+      </div>
+      <div id="onceFields" class="row hidden">
+        <label>روز <select id="fOnceDay">
+          <option value="0">امروز</option>
+          <option value="1">فردا</option>
+        </select></label>
+        <label>ساعت <input id="fOnceTime" type="time" value="15:00"></label>
+      </div>
+      <label class="switch-row">
+        <span>🔁 تکرار در هر روز</span>
+        <span class="switch"><input id="fRepeat" type="checkbox"><i></i></span>
+      </label>
+      <button type="submit" class="btn-primary">ثبت کار و یادآوری</button>
+    </form>
+    <p id="formMsg" class="form-msg"></p>
+  </section>
+
+  <section class="glass card">
+    <div class="list-head">
+      <h2>کارهای امروز <span id="taskCount" class="badge">۰</span></h2>
+      <div class="row">
+        <input id="search" type="search" placeholder="جست‌وجو…">
+        <select id="filterCat">
+          <option value="">همه دسته‌ها</option>
+          <option>سلامتی</option><option>کار</option><option>خانه</option>
+          <option>درس</option><option>ورزش</option><option>دیگر</option>
+        </select>
+        <select id="sortBy">
+          <option value="time">مرتب: ساعت</option>
+          <option value="priority">مرتب: اولویت</option>
+          <option value="title">مرتب: الفبا</option>
+        </select>
+      </div>
+    </div>
+    <ul id="taskList" class="tasks"></ul>
+    <p id="emptyMsg" class="empty">هنوز کاری برای امروز نداری. یک کار اضافه کن 👆</p>
+  </section>
+
+  <section class="glass card">
+    <h2>🧠 دستیار هوشمند</h2>
+    <p class="hint">به من پیام بده؛ مثلاً: «فقط امروز ساعت سه یادم بنداز قرصم را بخورم» یا «از دو تا دوازده شب هر نیم ساعت یادآوری کن آب بخورم».</p>
+    <div id="chatLog" class="chat"></div>
+    <form id="chatForm" class="chat-form">
+      <input id="chatInput" type="text" placeholder="پیامت را بنویس…" autocomplete="off">
+      <button type="submit" class="btn-primary">ارسال</button>
+    </form>
+    <div id="draftBox" class="draft hidden"></div>
+  </section>
+
+  <section class="glass card">
+    <h2>📜 سابقهٔ یادآوری‌ها</h2>
+    <ul id="historyList" class="history"></ul>
+    <p class="hint">یادآوری‌ها فقط وقتی برنامه باز است با صدا و لرزش می‌آیند. نوبت‌هایی که برنامه بسته بوده، اینجا «از دست رفت» ثبت می‌شوند.</p>
+  </section>
+</main>
+
+<div id="alarmOverlay" class="alarm hidden" role="alertdialog" aria-label="یادآوری">
+  <div class="alarm-card glass">
+    <div class="alarm-bell">🔔</div>
+    <h2>وقتشه!</h2>
+    <p id="alarmTitle"></p>
+    <p id="alarmTime" class="alarm-time"></p>
+    <div class="alarm-btns">
+      <button id="alarmDone" class="btn-primary">✅ انجام شد</button>
+      <button id="alarmSnooze" class="btn-ghost">⏰ ۱۰ دقیقه دیگر</button>
+      <button id="alarmSkip" class="btn-ghost">رد کردن</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
