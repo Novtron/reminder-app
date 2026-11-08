@@ -55,7 +55,7 @@ jobs:
         working-directory: src-tauri
         run: |
           if [ ! -d gen/android ]; then
-            cargo tauri android init
+            tauri android init
           fi
 
       - name: Build debug APK
@@ -63,7 +63,7 @@ jobs:
         env:
           CARGO_BUILD_JOBS: 2
           GRADLE_OPTS: "-Xmx2048m -Dorg.gradle.daemon=false"
-        run: cargo tauri android build --debug
+        run: tauri android build --debug --target aarch64
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
