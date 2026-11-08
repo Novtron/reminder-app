@@ -1,0 +1,63 @@
+name: Android APK (debug)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK 27
+        run: |
+          echo "y" | sdkmanager "ndk;27.2.12479018" "platforms;android-35" "build-tools;35.0.0"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Tauri CLI
+        run: npm install -g @tauri-apps/cli@2
+
+      - name: Init Android project (if needed)
+        working-directory: src-tauri
+        run: |
+          if [ ! -d gen/android ]; then
+            cargo tauri android init
+          fi
+
+      - name: Build debug APK
+        working-directory: src-tauri
+        env:
+          CARGO_BUILD_JOBS: 2
+          GRADLE_OPTS: "-Xmx2048m -Dorg.gradle.daemon=false"
+        run: cargo tauri android build --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminder-app-debug-apk
+          path: src-tauri/gen/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
