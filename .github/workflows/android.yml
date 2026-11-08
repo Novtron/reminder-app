@@ -27,6 +27,13 @@ jobs:
         with:
           targets: aarch64-linux-android
 
+      # The generated Gradle task (BuildTask.kt) runs `node tauri ...`, but
+      # Node can never resolve a bare `tauri` module (known upstream bug,
+      # tauri-apps/tauri#13892). The documented workaround is the cargo CLI,
+      # so install it here; the Gradle task is patched to use it below.
+      - name: Install Tauri CLI (cargo)
+        run: cargo install tauri-cli --version "^2"
+
       # The GitHub runner already ships the Android SDK. The third-party
       # setup-android action failed, so install the missing pieces directly
       # with sdkmanager instead of downloading another SDK.
@@ -69,6 +76,11 @@ jobs:
           if [ ! -d gen/android ]; then
             tauri android init
           fi
+          # BuildTask.kt runs `node tauri android android-studio-script`,
+          # which fails with "Cannot find module '.../src-tauri/tauri'".
+          # Point it at the cargo CLI instead (same arguments).
+          sed -i 's/"""node"""/"""cargo"""/' gen/android/buildSrc/src/main/java/com/muse/reminder/kotlin/BuildTask.kt
+          grep -n 'executable =' gen/android/buildSrc/src/main/java/com/muse/reminder/kotlin/BuildTask.kt
 
       - name: Build debug APK
         working-directory: src-tauri
