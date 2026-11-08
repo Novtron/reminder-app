@@ -93,6 +93,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: reminder-app-debug-apk
-          path: src-tauri/gen/android/app/build/outputs/apk/debug/*.apk
+          # The build uses the arm64 ABI flavor, so the APK lands in
+          # outputs/apk/arm64Debug/ (not outputs/apk/debug/).
+          path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
           if-no-files-found: error
           
