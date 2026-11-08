@@ -9,6 +9,9 @@ on:
 jobs:
   android:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,12 +27,19 @@ jobs:
         with:
           targets: aarch64-linux-android
 
+      # The GitHub runner already ships the Android SDK. The third-party
+      # setup-android action failed, so install the missing pieces directly
+      # with sdkmanager instead of downloading another SDK.
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android NDK 27
         run: |
-          echo "y" | sdkmanager "ndk;27.2.12479018" "platforms;android-35" "build-tools;35.0.0"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -n 1)"
+          fi
+          echo "sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018"
           echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
 
